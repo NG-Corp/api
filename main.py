@@ -10,32 +10,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import openpyxl
-from google.cloud.storage import Client, transfer_manager
 from flask import Flask, request
-from tesserocr import PyTessBaseAPI
-#API Download/Upload Function
-#To Cloud Storage
-def upload_blob(source_file_name):
-    """Uploads a file to the bucket."""
-    bucket_name = "pro-router-315819.appspot.com"
-    storage_client = Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(source_file_name)
-    blob.upload_from_filename(source_file_name)
-    print(f"File {source_file_name} uploaded!!!")
-def download(blob_names, destination_directory="/tmp", workers=8):
-    bucket_name = "pro-router-315819.appspot.com"
-    storage_client = Client()
-    bucket = storage_client.bucket(bucket_name)
-    results = transfer_manager.download_many_to_path(
-        bucket, blob_names, destination_directory=destination_directory, max_workers=workers
-    )
-    for name, result in zip(blob_names, results):
-        if isinstance(result, Exception):
-            print("Failed to download {} due to exception: {}".format(name, result))
-        else:
-            print("Downloaded {} to {}.".format(name, destination_directory + name))
-
 #Util Funcs
 #Finding
 def find(path):
@@ -263,7 +238,6 @@ def fin():
         downlos = request.args['n']
         downlos = downlos.replace('"', '')
         username = username.replace('"', '')
-        download([f"{downlos}"],)
         return {
             "RES" : find(username)
         }
@@ -278,15 +252,7 @@ def scn():
         excel = request.args['excel']
         image = image[1:-1]
         excel = excel[1:-1]
-        download([image])
-        download([excel])
-        images = ['/tmp/1.jpg']
-        with PyTessBaseAPI() as api:
-            for img in images:
-                api.SetImageFile(img)
-                print(api.GetUTF8Text())
-                print(api.AllWordConfidences())
-        l = scan(f"/tmp/{image}",f"/tmp/{excel}")
+        l = scan("8.jpg","n.xlsx")
         return {
             "RES" : f"True"
         }
